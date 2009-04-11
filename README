@@ -1,0 +1,18 @@
+
+The idea is to stick this on a (mostly) server that is in another room so you
+can, say, have some control over MPD while you're cooking.
+
+INSTALL
+
+  1. Fiddle with the keybindings.
+
+  2. Copy mptty to /usr/bin.
+
+  3. Add a 'music' user for extra securtiy.
+
+  3. Add the following to /etc/inittab:
+     1:23:respawn:/bin/su music -c 'exec /usr/bin/mptty' 38400 tty1
+
+  4. ...?
+
+  5. Profit!

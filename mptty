@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2009, Tom Adams <tom@holizz.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+# OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+# CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+import curses, mpd
+
+class Mptty:
+    def __init__(self):
+        self.mpd = mpd.MPDClient()
+
+    def mainloop(self):
+        try:
+            win = curses.initscr()
+            curses.cbreak()
+            curses.noecho()
+            win.keypad(True)
+
+            while True:
+                k = win.getkey()
+                if k == '.' or k == 'KEY_DC':
+                    pass
+                elif k == '0' or k == 'KEY_IC':
+                    self.run(self.mpd.pause)
+                elif k == '1' or k == 'KEY_END':
+                    self.run(self.mpd.next)
+                elif k == '2' or k == 'KEY_DOWN':
+                    self.run(self.mpd.previous)
+                elif k == '3' or k == 'KEY_NPAGE':
+                    pass
+                elif k == '4' or k == 'KEY_LEFT':
+                    self.run(self.mpd.play)
+                elif k == '5':
+                    self.run(lambda:self.mpd.setvol(100))
+                elif k == '6' or k == 'KEY_RIGHT':
+                    self.run(lambda:self.mpd.volume(+2))
+                elif k == '7' or k == 'KEY_HOME':
+                    self.run(self.mpd.stop)
+                elif k == '8' or k == 'KEY_UP':
+                    self.run(lambda:self.mpd.setvol(0))
+                elif k == '9' or k == 'KEY_PPAGE':
+                    self.run(lambda:self.mpd.volume(-2))
+                elif k == '\n':
+                    pass
+                else:
+                    pass#win.addstr('Unrecognised: '+k)
+
+        except KeyboardInterrupt:
+            pass
+        finally:
+            curses.endwin()
+
+    def run(self, c):
+        try:
+            c()
+        except mpd.ConnectionError:
+            self.mpd.connect('127.0.0.1',6600)
+            c()
+
+if __name__ == '__main__':
+    Mptty().mainloop()
